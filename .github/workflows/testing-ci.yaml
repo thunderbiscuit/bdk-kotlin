@@ -8,3 +8,6 @@ jobs:
     steps:
       - name: Print NDK contents
         run: ls -R /usr/local/lib/android/sdk/ndk/
+
+      - name: Print NDK Root
+        run: echo $ANDROID_NDK_ROOT
