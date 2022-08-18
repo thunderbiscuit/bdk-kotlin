@@ -1,8 +1,8 @@
 name: Publish
-#on: [workflow_dispatch]
-on:
-  release:
-    types: [published]
+on: [workflow_dispatch]
+#on:
+#  release:
+#    types: [published]
 
 jobs:
   build-jvm-macOS-M1-native-lib:
@@ -91,4 +91,4 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: mavenlocal-bdk-jvm-artifact
-          path: /home/runner/work/.m2/repository/
+          path: ~/.m2/repository/
