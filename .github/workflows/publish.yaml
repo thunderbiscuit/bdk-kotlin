@@ -21,6 +21,16 @@ jobs:
           git submodule set-url bdk-ffi https://github.com/bitcoindevkit/bdk-ffi.git
           git submodule update --init bdk-ffi
 
+      # What does this do really?
+      - name: cache
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            ./bdk-ffi/target
+          key: ${{ runner.os }}-${{ hashFiles('**/Cargo.toml','**/Cargo.lock') }}
+
       - name: Set up JDK
         uses: actions/setup-java@v2
         with:
@@ -40,29 +50,6 @@ jobs:
           # name: no name is required because we upload the entire directory
           # the default name "artifact" will be used
           path: /Users/runner/work/bdk-kotlin/bdk-kotlin/jvm/src/main/resources/
-
-#  test-artifact:
-#    name: Test artifact upload
-#    runs-on: macos-12
-#    steps:
-#      - name: Checkout publishing branch
-#        uses: actions/checkout@v2
-#
-#      - run: mkdir -p jvm/src/main/resources/darwin-aarch64/
-#      - run: mkdir -p jvm/src/main/resources/darwin-x86-64/
-#
-#      - run: echo hello > jvm/src/main/resources/darwin-aarch64/hello.txt
-#      - run: echo world > jvm/src/main/resources/darwin-x86-64/world.txt
-#
-#      - name: Display structure of downloaded files
-#        run: ls -R
-#
-#      - name: Upload macOS native libraries for reuse in publishing job
-#        uses: actions/upload-artifact@v3
-#        with:
-#          # name: no name is required because we upload the entire directory
-#          # the default name "artifact" will be used
-#          path: /Users/runner/work/bdk-kotlin/bdk-kotlin/jvm/src/main/resources/
 
   build-jvm-full-library:
     name: Create full bdk-jvm library
@@ -108,4 +95,3 @@ jobs:
         with:
           name: final-src-directory
           path: /home/runner/work/bdk-kotlin/bdk-kotlin/jvm/
-
