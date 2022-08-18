@@ -8,32 +8,55 @@ env:
   ANDROID_NDK_ROOT: /usr/local/lib/android/sdk/ndk/21.4.7075529
 
 jobs:
-  build-jvm-macOS-M1-native-lib:
-    name: Create M1 and x86_64 JVM native binaries
-    # if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags')
+#  build-jvm-macOS-M1-native-lib:
+#    name: Create M1 and x86_64 JVM native binaries
+#    # if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags')
+#    runs-on: macos-12
+#    steps:
+#      - name: Checkout publishing branch
+#        uses: actions/checkout@v2
+#
+#      - name: Update bdk-ffi git submodule
+#        run: |
+#          git submodule set-url bdk-ffi https://github.com/bitcoindevkit/bdk-ffi.git
+#          git submodule update --init bdk-ffi
+#
+#      - name: Set up JDK
+#        uses: actions/setup-java@v2
+#        with:
+#          distribution: temurin
+#          java-version: 11
+#
+#      - name: Install aarch64 Rust target
+#        run: rustup target add aarch64-apple-darwin
+#
+#      - name: Build bdk-jvm library
+#        run: ./gradlew :jvm:buildJvmLib
+#
+#      # build aarch64 + x86_64 native libraries and upload
+#      - name: Upload macOS native libraries for reuse in publishing job
+#        uses: actions/upload-artifact@v3
+#        with:
+#          # name: no name is required because we upload the entire directory
+#          # the default name "artifact" will be used
+#          path: /Users/runner/work/bdk-kotlin/bdk-kotlin/jvm/src/main/resources/
+
+  test-artifact:
+    name: Test artifact upload
     runs-on: macos-12
     steps:
       - name: Checkout publishing branch
         uses: actions/checkout@v2
 
-      - name: Update bdk-ffi git submodule
-        run: |
-          git submodule set-url bdk-ffi https://github.com/bitcoindevkit/bdk-ffi.git
-          git submodule update --init bdk-ffi
+      - run: mkdir -p jvm/src/main/resources/darwin-aarch64/
+      - run: mkdir -p jvm/src/main/resources/darwin-x86-64/
 
-      - name: Set up JDK
-        uses: actions/setup-java@v2
-        with:
-          distribution: temurin
-          java-version: 11
+      - run: echo hello > jvm/src/main/resources/darwin-aarch64/hello.txt
+      - run: echo world > jvm/src/main/resources/darwin-x86-64/world.txt
 
-      - name: Install aarch64 Rust target
-        run: rustup target add aarch64-apple-darwin
+      - name: Display structure of downloaded files
+        run: ls -R
 
-      - name: Build bdk-jvm library
-        run: ./gradlew :jvm:buildJvmLib
-
-      # build aarch64 + x86_64 native libraries and upload
       - name: Upload macOS native libraries for reuse in publishing job
         uses: actions/upload-artifact@v3
         with:
@@ -44,7 +67,8 @@ jobs:
   build-jvm-full-library:
     name: Create full bdk-jvm library
     # if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags')
-    needs: [build-jvm-macOS-M1-native-lib]
+#    needs: [build-jvm-macOS-M1-native-lib]
+    needs: [test-artifact]
     runs-on: ubuntu-22.04
     steps:
       - name: Checkout publishing branch
@@ -78,6 +102,13 @@ jobs:
 
       - name: Display structure of downloaded files
         run: ls -R
+
+      - name: Upload src with kotlin and resources
+        uses: actions/upload-artifact@v3
+        with:
+          # name: no name is required because we upload the entire directory
+          # the default name "artifact" will be used
+          path: /Users/runner/work/bdk-kotlin/bdk-kotlin/jvm/
 # run linux job to create native binaries
 # publish result
 
