@@ -7,7 +7,7 @@ env:
 
 jobs:
   build-jvm-macOS-M1-native-lib:
-    name: Create M1 JVM binaries
+    name: Create M1 and x86_64 JVM native binaries
     runs-on: macos-12
     steps:
       - name: Checkout publishing branch
@@ -35,7 +35,43 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           # name: no name is required because we upload the entire directory
+          # the default name "artifact" will be used
           path: /Users/runner/work/bdk-kotlin/bdk-kotlin/jvm/src/main/resources/
+
+  build-jvm-full-library:
+    name: Create full bdk-jvm library
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout publishing branch
+        uses: actions/checkout@v2
+
+      - name: Update bdk-ffi git submodule
+        run: |
+          git submodule set-url bdk-ffi https://github.com/bitcoindevkit/bdk-ffi.git
+          git submodule update --init bdk-ffi
+
+      - name: Set up JDK
+        uses: actions/setup-java@v2
+        with:
+          distribution: temurin
+          java-version: 11
+
+      - name: Build bdk-jvm library
+        run: ./gradlew :jvm:buildJvmLib
+
+      - name: Download macOS native libraries from previous job
+        uses: actions/download-artifact@v3
+        id: download
+        with:
+          # we download the artifact created in the prior job
+          name: artifact
+          path: /Users/runner/work/bdk-kotlin/bdk-kotlin/jvm/src/main/resources/
+
+      - name: 'Echo download path'
+        run: echo ${{steps.download.outputs.download-path}}
+
+      - name: Display structure of downloaded files
+        run: ls -R
 # run linux job to create native binaries
 # publish result
 
