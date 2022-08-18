@@ -17,7 +17,6 @@ jobs:
           git submodule set-url bdk-ffi https://github.com/bitcoindevkit/bdk-ffi.git
           git submodule update --init bdk-ffi
 
-      # What does this do really?
       - name: Cache
         uses: actions/cache@v3
         with:
@@ -59,6 +58,15 @@ jobs:
         run: |
           git submodule set-url bdk-ffi https://github.com/bitcoindevkit/bdk-ffi.git
           git submodule update --init bdk-ffi
+
+      - name: Cache
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            ./bdk-ffi/target
+          key: ${{ runner.os }}-${{ hashFiles('**/Cargo.toml','**/Cargo.lock') }}
 
       - name: Set up JDK
         uses: actions/setup-java@v2
