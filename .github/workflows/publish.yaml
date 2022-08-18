@@ -1,0 +1,47 @@
+name: Publish
+
+on: [workflow_dispatch]
+
+env:
+  ANDROID_NDK_ROOT: /usr/local/lib/android/sdk/ndk/21.4.7075529
+
+jobs:
+  build-jvm-macOS-M1-native-lib:
+    name: Create M1 JVM binaries
+    runs-on: macos-12
+    steps:
+      - name: Checkout publishing branch
+        uses: actions/checkout@v2
+
+      - name: Update bdk-ffi git submodule
+        run: |
+          git submodule set-url bdk-ffi https://github.com/bitcoindevkit/bdk-ffi.git
+          git submodule update --init bdk-ffi
+
+      - name: Set up JDK
+        uses: actions/setup-java@v2
+        with:
+          distribution: temurin
+          java-version: 11
+
+      - name: Build bdk-jvm library
+        run: ./gradlew :jvm:buildJvmLib
+
+      # build aarch64 + x86_64 native libraries and upload
+      - name: Upload macOS native libraries for reuse in publishing job
+        uses: actions/upload-artifact@v3
+        with:
+          name: libbdkffi.dylib
+          path: jvm/src/main/resources/
+# run linux job to create native binaries
+# publish result
+
+# run macOS job to create native binaries x86_64
+# publish result
+
+# run macOS job to create native binaries M1
+# publish result
+
+# combine all binaries into a single library
+
+# publish to Maven Central
