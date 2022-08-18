@@ -24,6 +24,9 @@ jobs:
           distribution: temurin
           java-version: 11
 
+      - name: Install aarch64 Rust target
+        run: rustup target add aarch64-apple-darwin
+
       - name: Build bdk-jvm library
         run: ./gradlew :jvm:buildJvmLib
 
@@ -31,8 +34,8 @@ jobs:
       - name: Upload macOS native libraries for reuse in publishing job
         uses: actions/upload-artifact@v3
         with:
-          name: libbdkffi.dylib
-          path: jvm/src/main/resources/
+          # name: no name is required because we upload the entire directory
+          path: /Users/runner/work/bdk-kotlin/bdk-kotlin/jvm/src/main/resources/
 # run linux job to create native binaries
 # publish result
 
