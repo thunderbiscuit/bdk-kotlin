@@ -7,4 +7,4 @@ jobs:
 
     steps:
       - name: Print NDK contents
-        run: ls -R /usr/local/lib/android/sdk/
+        run: ls -R /usr/local/lib/android/sdk/ndk/
