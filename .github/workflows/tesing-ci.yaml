@@ -1,0 +1,10 @@
+name: Testing CI
+on: [workflow_dispatch]
+
+jobs:
+  print-directories:
+    runs-on: ubuntu-20.04
+
+    steps:
+      - name: Print NDK contents
+        run: ls -R /usr/local/lib/android/sdk/
