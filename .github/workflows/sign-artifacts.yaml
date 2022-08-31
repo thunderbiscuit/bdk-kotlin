@@ -1,0 +1,46 @@
+name: Sign bdk-jvm artifacts before publishing
+on: [workflow_dispatch]
+
+jobs:
+  build-jvm-linux-library:
+    name: Create full bdk-jvm library
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout publishing branch
+        uses: actions/checkout@v2
+
+      - name: Update bdk-ffi git submodule
+        run: |
+          git submodule set-url bdk-ffi https://github.com/bitcoindevkit/bdk-ffi.git
+          git submodule update --init bdk-ffi
+
+      - name: Cache
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            ./bdk-ffi/target
+          key: ${{ runner.os }}-${{ hashFiles('**/Cargo.toml','**/Cargo.lock') }}
+
+      - name: Set up JDK
+        uses: actions/setup-java@v2
+        with:
+          distribution: temurin
+          java-version: 11
+
+      - name: Build bdk-jvm library
+        run: ./gradlew :jvm:buildJvmLib
+
+      - name: Publish to MavenLocal
+        env:
+          ORG_GRADLE_PROJECT_signingKey: ${{ secrets.PGP_SECRET_KEY }}
+          ORG_GRADLE_PROJECT_signingPassword: ${{ secrets.PGP_TEST_PASSPHRASE }}
+        run: ./gradlew :jvm:publishToMavenLocal
+
+      # Copy/paste this artifact in your local Maven repository at ~/.m2/repository/
+      - name: Upload library from MavenLocal
+        uses: actions/upload-artifact@v3
+        with:
+          name: mavenlocal-bdk-jvm-artifact
+          path: ~/.m2/repository/
