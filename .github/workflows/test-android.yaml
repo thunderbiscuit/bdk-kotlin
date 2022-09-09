@@ -8,7 +8,13 @@ env:
 
 jobs:
   build:
-    runs-on: ubuntu-20.04
+    name: "Build and run connected instrumentation tests"
+    runs-on: macos-12
+#    runs-on: ubuntu-20.04
+    strategy:
+      matrix:
+        api-level: [ 26, 31 ]
+        arch: [ x86_64 ]
     steps:
       - name: Install Android NDK 21.4.7075529
         run: |
@@ -46,5 +52,9 @@ jobs:
       - name: Build bdk-android library
         run: ./gradlew :android:buildAndroidLib
 
-      - name: Run Android tests
-        run: ./gradlew :android:test --console=rich
+      - name: Run Connected Instrumentation Tests
+        uses: ReactiveCircus/android-emulator-runner@v2
+        with:
+          api-level: ${{ matrix.api-level }}
+          arch: ${{ matrix.arch }}
+          script: ./gradlew :android:connectedAndroidTest --console=rich
