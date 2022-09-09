@@ -53,10 +53,10 @@ jobs:
           java-version: 11
 
       - name: Install rust android targets
-        run: rustup target add x86_64-linux-android aarch64-linux-android armv7-linux-androideabi
+        run: rustup target add x86_64-linux-android
 
       - name: Build bdk-android library
-        run: ./gradlew :android:buildAndroidLib
+        run: ./gradlew :android:buildAndroidLib --exclude-task :android:buildAndroidArmv7Binary --exclude-task :android:buildAndroidAarch64Binary
 
       - name: Run Connected Instrumentation Tests
         uses: ReactiveCircus/android-emulator-runner@v2
